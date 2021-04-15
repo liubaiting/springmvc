@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+">
+    <!--加载外部配置文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${dataSource.driverClassName}"/>
+        <property name="url" value="${dataSource.url}"/>
+        <property name="username" value="${dataSource.username}"/>
+        <property name="password" value="${dataSource.password}"/>
+    </bean>
+
+    <!--事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--创建会话工厂-->
+    <bean id="sessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--指定数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--指定pojo的管理-->
+        <property name="typeAliasesPackage" value="com.liubt.ssm.pojo"/>
+        <!--指定sqlMapper的管理-->
+        <property name="mapperLocations" value="classpath:sqlMapper/*Mapper.xml"/>
+        <!-- 加载mybatis的全局配置文件 -->
+        <property name="configuration">
+            <bean class="org.apache.ibatis.session.Configuration">
+                <property name="logImpl" value="org.apache.ibatis.logging.log4j2.Log4j2Impl"></property>
+            </bean>
+        </property>
+    </bean>
+
+    <!--定义mapper 自动扫描接口的关系映射-->
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 传入 sqlSessionFactory -->
+        <property name="sqlSessionFactoryBeanName" value="sessionFactoryBean"/>
+        <!-- 传入 mapper接口所在包 -->
+        <property name="basePackage" value="com.liubt.ssm.mapper"/>
+    </bean>
+</beans>
